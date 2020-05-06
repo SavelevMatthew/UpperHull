@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from grids import *
-from upperHill import get_upper_convex_hull
+from upperHull import get_upper_convex_hull
 
 def main():
     G_grid = get_circle_grid(dim=1, radius=1, grid_ann=100)
