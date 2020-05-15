@@ -39,7 +39,7 @@ def get_min(m, G_grid, psi_grid, dir_grid):
             start_point -= 1
         else:
             start_point += 1
-
+    # Старая и рабочая версия, разбитая на подфункции
     # return min([get_body_value(m, d, G_grid, psi_grid, dir_grid) for d in range(len(dir_grid))])
 
 
@@ -58,24 +58,48 @@ def get_inner_value(d, g, G_grid, psi_grid, dir_grid):
 
 
 def get_exponents(objects, alpha):
+    """
+    Получаем экспоненты (в будущем добавить кэш, что не считать кучу раз)
+    :param objects: числовое множество
+    :param alpha: коэффициент сглаживания
+    :return: экспоненты
+    """
     return [math.e ** (alpha * obj) for obj in objects]
 
 
 def smooth_max(objects, exponents):
+    """
+    Расчет плавного максимума согласно формулы из вики
+    :param objects: числовое множество
+    :param exponents: коэффициент сглаживания
+    :return: сглаженный максимум
+    """
     numerator = sum([objects[i] * exponents[i] for i in range(len(objects))])
-    denominator = sum([exp for exp in exponents])
+    denominator = sum(exponents)
     return numerator / denominator
 
 
 def smooth_max_grad(index, objects, alpha):
+    """
+    Получает значение градиента по элементу с номером index
+    :param index: индекс получаемого градиента
+    :param objects: числовое множество
+    :param alpha: коэффициент сглаживания
+    :return: значение градиента
+    """
     exps = get_exponents(objects, alpha)
     sm_max = smooth_max(objects, exps)
-    return (exps[index] / sum([exp for exp in exps])) * (1 + alpha * (objects[index] - sm_max))
+    return (exps[index] / sum(exps)) * (1 + alpha * (objects[index] - sm_max))
 
 # grad region
 
 
 def get_inner_grad(m, d, alpha, G_grid, psi_grid, dir_grid):
+    # Получили множество значений внутренних скобок
+    # все, что внутри max в оригинальной формуле
     inner_values = [get_inner_value(d, g, G_grid, psi_grid, dir_grid) for g in range(len(G_grid))]
+    # Для каждого значения ищем градиент и домножаем на mki,
+    # Что есть mk в одномерном случае
     smooth_grad_values = [smooth_max_grad(i, inner_values, alpha) * G_grid[i] for i in range(len(inner_values))]
+    # Возвращаем сумму - mi, что просто m в одномерном случае
     return sum([grad for grad in smooth_grad_values]) - G_grid[m]
