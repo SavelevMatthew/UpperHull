@@ -15,22 +15,28 @@ def get_upper_convex_hull(G_grid, psi_grid, dir_grid_ann):
     """
     dim = G_grid.shape[1]
     dir_grid = get_directions_grid(dim, dir_grid_ann)
-
+    print(len(G_grid))
     return np.array([get_min(m, G_grid, psi_grid, dir_grid) for m in range(len(G_grid))])
 
 
 def get_min(m, G_grid, psi_grid, dir_grid):
+    print(m)
     alpha = 0.5
     start_point = randint(0, len(dir_grid) - 1)
+    last_point = start_point
+    last_grad = 0
     while True:
         grad = get_inner_gradient(m, start_point, alpha, G_grid, psi_grid, dir_grid)
-        if abs(grad) < 0.5 or (start_point == 0 and grad > 0) or (start_point == len(dir_grid) - 1 and grad < 0):
+        if abs(grad) < 0.01 or (start_point == 0 and grad > 0) or (start_point == len(dir_grid) - 1 and grad < 0):
             return get_body_value(m, start_point, G_grid, psi_grid, dir_grid)
+        elif grad * last_grad < 0:
+            return min([get_body_value(m, start_point, G_grid, psi_grid, dir_grid), get_body_value(m, last_point, G_grid, psi_grid, dir_grid)])
+        last_point = start_point
+        if grad > 0:
+            start_point -= 1
         else:
-            if grad > 0:
-                start_point -= 1
-            else:
-                start_point += 1
+            start_point += 1
+        last_grad = grad
 
     # return min([get_body_value(m, d, G_grid, psi_grid, dir_grid) for d in range(len(dir_grid))])
 
