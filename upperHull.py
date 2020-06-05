@@ -1,9 +1,12 @@
 import numpy as np
 import math
+from multiprocessing import Pool, cpu_count
 from random import randint
 from collections import deque
+from timeMeasure import my_timer
 
 
+@my_timer
 def get_upper_convex_hull(builder, G_grid, psi_grid):
     """
     The function make the upper convex hull function of the function psi
@@ -14,8 +17,18 @@ def get_upper_convex_hull(builder, G_grid, psi_grid):
     """
     dir_grid = builder.get_directions_grid()
     print(len(G_grid))
-    return np.array([get_min(m, G_grid, psi_grid, dir_grid, builder) for m in
-                     range(len(G_grid))])
+    args = [(m, G_grid, psi_grid, dir_grid, builder)
+            for m in range(len(G_grid))]
+    pool = Pool(processes=cpu_count())
+    data = pool.map(get_min_unpack, args)
+    pool.close()
+    return np.array(data)
+    # return np.array([get_min(m, G_grid, psi_grid, dir_grid, builder) for m in
+    #                  range(len(G_grid))])
+
+
+def get_min_unpack(packed_args):
+    return get_min(*packed_args)
 
 
 def get_min(m, G_grid, psi_grid, dir_grid, builder):
