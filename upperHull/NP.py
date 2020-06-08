@@ -1,10 +1,10 @@
-from timeMeasure import Measurer
+from measure import Measurer
 from multiprocessing import Pool
 from .common import get_body_value
 import numpy as np
 
 
-@Measurer.my_timer
+@Measurer.timer
 def get_upper_convex_hull(threads, builder, g_grid, psi_grid):
     """
     :param threads: number of allowed processes
@@ -15,7 +15,7 @@ def get_upper_convex_hull(threads, builder, g_grid, psi_grid):
     of the function psi
     """
     dir_grid = builder.get_directions_grid()
-    print(len(g_grid))
+    # print(len(g_grid))
     args = [(m, g_grid, psi_grid, dir_grid)
             for m in range(len(g_grid))]
     pool = Pool(processes=threads)

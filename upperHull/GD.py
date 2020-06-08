@@ -1,4 +1,4 @@
-from timeMeasure import Measurer
+from measure import Measurer
 from multiprocessing import Pool
 from random import randint
 from collections import deque
@@ -7,7 +7,7 @@ import numpy as np
 import math
 
 
-@Measurer.my_timer
+@Measurer.timer
 def get_upper_convex_hull(threads, builder, g_grid, psi_grid, alpha):
     """
     The function make the upper convex hull function of the function psi
@@ -20,7 +20,7 @@ def get_upper_convex_hull(threads, builder, g_grid, psi_grid, alpha):
     of the function psi
     """
     dir_grid = builder.get_directions_grid()
-    print(len(g_grid))
+    # print(len(g_grid))
     args = [(alpha, m, g_grid, psi_grid, dir_grid, builder)
             for m in range(len(g_grid))]
     pool = Pool(processes=threads)
@@ -44,10 +44,10 @@ def get_min(alpha, m, g_grid, psi_grid, dir_grid, builder):
                                          psi_grid, dir_grid))
         new_index = get_step(grads, current_index, builder)
         if new_index is None:
-            print(info + ' Stable exit ' + str(current_index))
+            # print(info + ' Stable exit ' + str(current_index))
             return get_body_value(m, current_index, g_grid, psi_grid, dir_grid)
         elif new_index in cache:
-            print(info + ' Cycle detected!')
+            # print(info + ' Cycle detected!')
             return min([get_body_value(m, index, g_grid, psi_grid, dir_grid)
                         for index in cache])
         current_index = new_index
