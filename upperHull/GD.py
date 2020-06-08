@@ -20,15 +20,12 @@ def get_upper_convex_hull(threads, builder, g_grid, psi_grid, alpha):
     of the function psi
     """
     dir_grid = builder.get_directions_grid()
-    # print(len(g_grid))
     args = [(alpha, m, g_grid, psi_grid, dir_grid, builder)
             for m in range(len(g_grid))]
     pool = Pool(processes=threads)
     data = pool.map(unpacked_min, args)
     pool.close()
     return np.array(data)
-    # return np.array([get_min(m, G_grid, psi_grid, dir_grid, builder) for m in
-    #                  range(len(G_grid))])
 
 
 def unpacked_min(packed_args):
