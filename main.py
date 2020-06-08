@@ -1,41 +1,46 @@
 import matplotlib.pyplot as plt
 from grids import *
-from upperHull import get_upper_convex_hull
+from upperHull import GD, NP
 from multiprocessing import cpu_count
 from mpl_toolkits.mplot3d import Axes3D
+from timeMeasure import Measurer
 
 
-def plot_3d(G_grid, f_grid, G_grid_ann):
+def plot_3d(g_grid, f_grid, g_grid_ann):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    ax.plot_surface(G_grid[:, 0].reshape(G_grid_ann, G_grid_ann),
-                    G_grid[:, 1].reshape(G_grid_ann, G_grid_ann),
-                    f_grid.reshape(G_grid_ann, G_grid_ann))
+    ax.plot_surface(g_grid[:, 0].reshape(g_grid_ann, g_grid_ann),
+                    g_grid[:, 1].reshape(g_grid_ann, g_grid_ann),
+                    f_grid.reshape(g_grid_ann, g_grid_ann))
 
 
 def main():
     builder = GridBuilder(dim=1, ann=100)
-    G_grid = builder.get_circle_grid(1)
 
-    psi_grid = np.array([np.sin(4 * G_grid[i]) for i in range(len(G_grid))])
+    g_grid = builder.get_circle_grid(1)
+    psi_grid = np.array([np.sin(4 * g_grid[i]) for i in range(len(g_grid))])
+    phi_grid = GD.get_upper_convex_hull(cpu_count(), builder, g_grid, psi_grid,
+                                        10)
 
-    phi_grid = get_upper_convex_hull(builder, G_grid, psi_grid)
-
-    plt.plot(G_grid, psi_grid)
-    plt.plot(G_grid, phi_grid)
+    plt.plot(g_grid, psi_grid)
+    plt.plot(g_grid, phi_grid)
     plt.show()
 
 
 def main_3d():
     builder = GridBuilder(2, 10)
-    G_grid = builder.get_circle_grid(1)
-    psi_grid = np.array([np.sin(6 * G_grid[i][0]) * np.cos(4 * G_grid[i][1])
-                         for i in range(len(G_grid))])
-    phi_grid = get_upper_convex_hull(cpu_count(), builder, G_grid, psi_grid)
+    g_grid = builder.get_circle_grid(1)
+    psi_grid = np.array([np.sin(6 * g_grid[i][0]) * np.cos(4 * g_grid[i][1])
+                         for i in range(len(g_grid))])
 
-    plot_3d(G_grid, psi_grid, builder.ann)
-    plot_3d(G_grid, phi_grid, builder.ann)
+    _ = NP.get_upper_convex_hull(cpu_count(), builder, g_grid, psi_grid)
+    phi_grid = GD.get_upper_convex_hull(cpu_count(), builder, g_grid, psi_grid,
+                                        10)
+
+    plot_3d(g_grid, psi_grid, builder.ann)
+    plot_3d(g_grid, phi_grid, builder.ann)
     plt.show()
+    print(Measurer.measures)
 
 
 if __name__ == '__main__':
