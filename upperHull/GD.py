@@ -34,12 +34,13 @@ def unpacked_min(packed_args):
 
 def get_min(alpha, m, g_grid, psi_grid, dir_grid, builder):
     current_index = randint(0, len(dir_grid) - 1)
+    last_index = current_index
+    cache = deque(maxlen=int(2**builder.dim))
     info = "{}/{}".format(m, len(g_grid))
-    cache = deque(maxlen=int(2**builder.dim + 1))
     while True:
         grads = list(get_all_inner_grads(m, current_index, alpha, g_grid,
                                          psi_grid, dir_grid))
-        new_index = get_step(grads, current_index, builder)
+        new_index = get_step(grads, current_index, last_index, builder)
         if new_index is None:
             # print(info + ' Stable exit ' + str(current_index))
             return get_body_value(m, current_index, g_grid, psi_grid, dir_grid)
@@ -47,11 +48,12 @@ def get_min(alpha, m, g_grid, psi_grid, dir_grid, builder):
             # print(info + ' Cycle detected!')
             return min([get_body_value(m, index, g_grid, psi_grid, dir_grid)
                         for index in cache])
+        last_index = current_index
         current_index = new_index
         cache.append(new_index)
 
 
-def get_step(grads, current_index, builder):
+def get_step(grads, current_index, last_index, builder):
     pairs = [(i, abs(grads[i])) for i in range(len(grads))]
     ordered = sorted(pairs, key=lambda x: -x[1])
     for move in ordered:
@@ -59,7 +61,7 @@ def get_step(grads, current_index, builder):
         grad = grads[dim]
         new_index = current_index + math.copysign(builder.ann ** dim, grad)
         new_index = int(new_index)
-        if (new_index < 0 or
+        if (new_index < 0 or new_index == last_index or
                 new_index >= builder.ann ** builder.dim or move[1] < 0.05):
             continue
         # print(new_index, grad)
