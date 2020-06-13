@@ -10,6 +10,7 @@ def info(msg):
 
 
 def make_report(name, counter, builder, phi_np, phi_gd):
+    name = name.replace('\n', ' ').strip()
     print('=' * 64)
     info('Функция {} #{} (Потоков: {}, размерность: {}, '
          'точек: {})'.format(name, counter, cpu_count(), builder.dim + 1,
@@ -35,8 +36,8 @@ def make_report(name, counter, builder, phi_np, phi_gd):
     counter += 1
     Measurer.time_measures.clear()
     print('=' * 64)
-    return [name, builder.dim + 1, cpu_count(), len(phi_np), full_time,
-            gd_time, max_error_percent, avg_error_percent]
+    return ['\n{}\n'.format(name), builder.dim + 1, cpu_count(), len(phi_np),
+            full_time, gd_time, max_error_percent, avg_error_percent]
 
 
 def get_available_name():

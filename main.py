@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from openpyxl import load_workbook
 from grids import *
 from upperHull import GD, NP
 from functions import ThreeDimensions
 from utils import *
-from mpl_toolkits.mplot3d import Axes3D
 
 
 def plot_3d(g_grid, f_grid, g_grid_ann):
@@ -25,7 +26,7 @@ def main():
                                                psi_grid)
         phi_grid_gd = GD.get_upper_convex_hull(cpu_count(), builder, g_grid,
                                                psi_grid, 10)
-        report = make_report(func.__name__, counter, builder, phi_grid_np,
+        report = make_report(func.__doc__, counter, builder, phi_grid_np,
                              phi_grid_gd)
         report.insert(4, alpha)
         reports.append(report)
@@ -33,6 +34,7 @@ def main():
         plot_3d(g_grid, phi_grid_np, builder.ann)
         plot_3d(g_grid, phi_grid_gd, builder.ann)
         counter += 1
+
     plt.show()
 
     df = pd.DataFrame(reports, columns=['Function Name', 'Dimensions',
@@ -40,15 +42,18 @@ def main():
                                         'Full NP time (sec)', 'GD time (sec)',
                                         'Max error (%)', 'Average Error (%)'])
     path, sheet = get_available_name()
-
-    writer = pd.ExcelWriter(path, engine='xlsxwriter')
-    df.to_excel(writer, index=False, sheet_name=sheet)
-    worksheet = writer.sheets[sheet]
-    worksheet.set_zoom(50)
-    worksheet.set_column('A:A', 32)
-    worksheet.set_column('B:D', 16)
-    worksheet.set_column('E:H', 24)
-    writer.save()
+    with pd.ExcelWriter(path, engine='openpyxl') as writer:
+        if os.path.exists(path):
+            writer.book = load_workbook(path)
+        df.to_excel(writer, index=False, sheet_name=sheet)
+        worksheet = writer.sheets[sheet]
+        worksheet.sheet_view.zoomScale = 50
+        worksheet.column_dimensions['A'].width = 32
+        for d in ['B', 'C', 'D']:
+            worksheet.column_dimensions[d].width = 16
+        for d in ['E', 'F', 'G', 'H', 'I']:
+            worksheet.column_dimensions[d].width = 24
+        writer.save()
 
 
 if __name__ == '__main__':
