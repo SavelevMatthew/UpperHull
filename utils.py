@@ -58,9 +58,10 @@ def write_statistics(reports):
         df.to_excel(writer, index=True, sheet_name=sheet)
         worksheet = writer.sheets[sheet]
         worksheet.sheet_view.zoomScale = 50
-        worksheet.column_dimensions['A'].width = 32
-        for d in ['B', 'C', 'D']:
+        worksheet.column_dimensions['A'].width = 4
+        worksheet.column_dimensions['B'].width = 32
+        for d in ['C', 'D', 'E']:
             worksheet.column_dimensions[d].width = 16
-        for d in ['E', 'F', 'G', 'H', 'I']:
+        for d in ['F', 'G', 'H', 'I', 'J']:
             worksheet.column_dimensions[d].width = 24
         writer.save()
