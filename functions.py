@@ -37,10 +37,37 @@ class ThreeDimensions:
         """
         return (26 * (x ** 2 + y ** 2) - 48 * x * y) / 100
 
+    @staticmethod
+    def func6(x, y):
+        """
+        min(|x|, |y|)
+        """
+        return min([abs(dim) for dim in [x, y]])
+
     all = [(10, func1.__func__), (10, func2.__func__), (10, func3.__func__),
-           (10, func4.__func__), (10, func5.__func__)]
+           (10, func4.__func__), (10, func5.__func__), (10, func6.__func__)]
 
 
-# class FourDimensions:
-#     @staticmethod
-#
+class FourDimensions:
+    @staticmethod
+    def func1(x, y, z):
+        """
+        (x^2 + y^2 + z^2) / 2
+        """
+        return (x ** 2 + z ** 2 + y ** 2) / 2
+
+    @staticmethod
+    def func2(x, y, z):
+        """
+        cos(x)sin(y) * z
+        """
+        return np.cos(x) * np.sin(y) * z
+
+    @staticmethod
+    def func3(x, y, z):
+        """
+        min(|x|, |y|, |z|)
+        """
+        return min([abs(dim) for dim in [x, y, z]])
+
+    all = [(10, func1.__func__), (10, func2.__func__), (10, func3.__func__)]
