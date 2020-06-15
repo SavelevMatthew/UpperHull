@@ -16,14 +16,15 @@ def plot_3d(g_grid, f_grid, g_grid_ann):
 
 
 def process_3d(reports):
-    builder = GridBuilder(2, 10)
-    g_grid = builder.get_circle_grid(1)
+    builder = GridBuilder(2, 10, 10)
+    g_grid = builder.get_circle_grid(1, 10)
     counter = len(reports) + 1
     path = os.path.join(os.getcwd(), 'report', 'last_graphs')
     if os.path.exists(path) and os.path.isdir(path):
         shutil.rmtree(path, ignore_errors=True)
     for alpha, func in ThreeDimensions.all:
-        func_path = os.path.join(path, func.__name__)
+        func_path = os.path.join(path, 'dim{}_{}'.format(builder.dim + 1,
+                                                         func.__name__))
         os.makedirs(func_path)
         psi_grid = np.array([func(*g) for g in g_grid])
         phi_grid_np = NP.get_upper_convex_hull(cpu_count(), builder, g_grid,
@@ -45,8 +46,8 @@ def process_3d(reports):
 
 
 def process_4d(reports):
-    builder = GridBuilder(3, 5)
-    g_grid = builder.get_circle_grid(1)
+    builder = GridBuilder(3, 5, 5)
+    g_grid = builder.get_circle_grid(1, 5)
     counter = len(reports) + 1
     for alpha, func in FourDimensions.all:
         psi_grid = np.array([func(*g) for g in g_grid])
@@ -66,7 +67,7 @@ def main():
     reports = process_3d([])
     reports = process_4d(reports)
     write_statistics(reports)
-    # plt.show()
+    plt.show()
 
 
 if __name__ == '__main__':

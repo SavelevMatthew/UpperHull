@@ -59,7 +59,7 @@ def get_step(grads, current_index, last_index, builder):
     for move in ordered:
         dim = move[0]
         grad = grads[dim]
-        new_index = current_index + math.copysign(builder.ann ** dim, grad)
+        new_index = current_index + math.copysign(builder.dir_ann ** dim, grad)
         new_index = int(new_index)
         if (new_index < 0 or new_index == last_index or
                 new_index >= builder.ann ** builder.dim or move[1] < 0.05):
