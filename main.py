@@ -16,8 +16,8 @@ def plot_3d(g_grid, f_grid, g_grid_ann):
 
 
 def process_3d(reports):
-    builder = GridBuilder(2, 10, 10)
-    g_grid = builder.get_circle_grid(1, 10)
+    builder = GridBuilder(2, 15, 15, 20)
+    g_grid = builder.get_circle_grid(1, 15)
     counter = len(reports) + 1
     path = os.path.join(os.getcwd(), 'report', 'last_graphs')
     if os.path.exists(path) and os.path.isdir(path):

@@ -2,11 +2,12 @@ import numpy as np
 
 
 class GridBuilder:
-    def __init__(self, dim, ann, dir_ann):
+    def __init__(self, dim, ann, dir_ann, accuracy=100):
         self.dim = dim
         self.ann = ann
         self.dir_ann = dir_ann
         self.divs = [self.ann ** i for i in range(self.dim)]
+        self.acc = accuracy
 
     def get_directions_grid(self):
         """

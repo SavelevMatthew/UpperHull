@@ -1,6 +1,6 @@
 from measure import Measurer
 from multiprocessing import Pool
-from random import randint
+from random import randint, sample
 from collections import deque
 from .common import get_body_value, get_inner_value
 import numpy as np
@@ -36,10 +36,12 @@ def get_min(alpha, m, g_grid, psi_grid, dir_grid, builder):
     current_index = randint(0, len(dir_grid) - 1)
     last_index = current_index
     cache = deque(maxlen=int(2**builder.dim))
+    available_moves = builder.dir_ann * builder.dim
+    is_scholastic = builder.acc != 100
     info = "{}/{}".format(m, len(g_grid))
-    while True:
+    while (not is_scholastic) or available_moves > 0:
         grads = list(get_all_inner_grads(m, current_index, alpha, g_grid,
-                                         psi_grid, dir_grid))
+                                         psi_grid, dir_grid, builder.acc))
         new_index = get_step(grads, current_index, last_index, builder)
         if new_index is None:
             # print(info + ' Stable exit ' + str(current_index))
@@ -51,6 +53,11 @@ def get_min(alpha, m, g_grid, psi_grid, dir_grid, builder):
         last_index = current_index
         current_index = new_index
         cache.append(new_index)
+        if is_scholastic:
+            available_moves -= 1
+    if is_scholastic:
+        return min([get_body_value(m, index, g_grid, psi_grid, dir_grid)
+                    for index in cache])
 
 
 def get_step(grads, current_index, last_index, builder):
@@ -69,16 +76,19 @@ def get_step(grads, current_index, last_index, builder):
     return None
 
 
-def get_all_inner_grads(m, d, alpha, g_grid, psi_grid, dir_grid):
+def get_all_inner_grads(m, d, alpha, g_grid, psi_grid, dir_grid, accuracy):
     if len(g_grid) == 0:
         return []
     dimensions = g_grid.shape[1]
+    amount = int(len(g_grid) * accuracy / 100)
+    indexes = sample(range(len(g_grid)), amount)
     inner_values = [get_inner_value(d, g, g_grid, psi_grid, dir_grid) for g in
-                    range(len(g_grid))]
+                    indexes]
     for dim in range(dimensions):
         smooth_grad_values = [
-            smooth_max_grad(i, inner_values, alpha) * g_grid[i][dim] for i in
-            range(len(inner_values))]
+            smooth_max_grad(i, inner_values, alpha)
+            * g_grid[indexes[i]][dim] for i in
+            range(len(indexes))]
         yield sum([grad for grad in smooth_grad_values]) - g_grid[m][dim]
 
 

@@ -14,8 +14,9 @@ def make_report(name, counter, builder, phi_np, phi_gd):
     name = name.replace('\n', ' ').strip()
     print('=' * 64)
     info('Функция {} #{} (Потоков: {}, размерность: {}, '
-         'точек: {})'.format(name, counter, cpu_count(), builder.dim + 1,
-                             len(phi_np)))
+         'точек: {}, точность: {})'.format(name, counter, cpu_count(),
+                                           builder.dim + 1, len(phi_np),
+                                           builder.acc))
     full_time = round(Measurer.time_measures[0].total_seconds(), 2)
     gd_time = round(Measurer.time_measures[1].total_seconds(), 2)
     info('Время полного перебора: {} секунд'.format(full_time))
@@ -31,7 +32,7 @@ def make_report(name, counter, builder, phi_np, phi_gd):
     Measurer.time_measures.clear()
     print('=' * 64)
     return ['\n{}\n'.format(name), builder.dim + 1, cpu_count(), len(phi_np),
-            full_time, gd_time, max_error, avg_error]
+            full_time, gd_time, max_error, avg_error, builder.acc]
 
 
 def get_available_name():
@@ -48,7 +49,8 @@ def get_available_name():
 
 def write_statistics(reports):
     df = pd.DataFrame(reports, columns=['Function Name', 'Dimensions',
-                                        'Threads', 'Dots amount', 'Alpha',
+                                        'Threads', 'Dots amount',
+                                        'Accuracy (% of dots used)', 'Alpha',
                                         'Full NP time (sec)', 'GD time (sec)',
                                         'Max error', 'Average Error'])
     path, sheet = get_available_name()
@@ -60,8 +62,8 @@ def write_statistics(reports):
         worksheet.sheet_view.zoomScale = 50
         worksheet.column_dimensions['A'].width = 4
         worksheet.column_dimensions['B'].width = 32
-        for d in ['C', 'D', 'E']:
+        for d in ['C', 'D', 'E', 'F']:
             worksheet.column_dimensions[d].width = 16
-        for d in ['F', 'G', 'H', 'I', 'J']:
+        for d in ['G', 'H', 'I', 'J', 'K']:
             worksheet.column_dimensions[d].width = 24
         writer.save()

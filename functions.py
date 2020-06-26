@@ -44,8 +44,8 @@ class ThreeDimensions:
         """
         return min([abs(dim) for dim in [x, y]])
 
-    all = [(10, func1.__func__), (10, func2.__func__), (10, func3.__func__),
-           (10, func4.__func__), (10, func5.__func__), (10, func6.__func__)]
+    all = [(7, func1.__func__), (7, func2.__func__), (7, func3.__func__),
+           (7, func4.__func__), (7, func5.__func__), (7, func6.__func__)]
 
 
 class FourDimensions:
