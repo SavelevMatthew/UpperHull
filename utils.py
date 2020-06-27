@@ -32,7 +32,8 @@ def make_report(name, counter, builder, phi_np, phi_gd):
     Measurer.time_measures.clear()
     print('=' * 64)
     return ['\n{}\n'.format(name), builder.dim + 1, cpu_count(), len(phi_np),
-            full_time, gd_time, max_error, avg_error, builder.acc]
+            builder.acc,
+            full_time, gd_time, max_error, avg_error]
 
 
 def get_available_name():

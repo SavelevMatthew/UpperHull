@@ -3,7 +3,7 @@ import shutil
 from mpl_toolkits.mplot3d import Axes3D
 from grids import *
 from upperHull import GD, NP
-from functions import ThreeDimensions, FourDimensions
+from functions import ThreeDimensions, FourDimensions, TwoDimensions
 from utils import *
 
 
@@ -15,12 +15,42 @@ def plot_3d(g_grid, f_grid, g_grid_ann):
                     f_grid.reshape(g_grid_ann, g_grid_ann))
 
 
+def process_2d(reports):
+    builder = GridBuilder(1, 100, 100)
+    g_grid = builder.get_circle_grid(1, 100)
+    counter = len(reports) + 1
+    path = os.path.join(os.getcwd(), 'report', 'last_graphs')
+    if os.path.exists(path) and os.path.isdir(path):
+        shutil.rmtree(path, ignore_errors=True)
+    os.makedirs(path)
+    for alpha, func in TwoDimensions.all:
+        func_path = os.path.join(path, 'dim{}_{}.png'.format(builder.dim + 1,
+                                                         func.__name__))
+        psi_grid = np.array([func(*g) for g in g_grid])
+        phi_grid_np = NP.get_upper_convex_hull(cpu_count(), builder, g_grid,
+                                               psi_grid)
+        phi_grid_gd = GD.get_upper_convex_hull(cpu_count(), builder, g_grid,
+                                               psi_grid, alpha)
+        report = make_report(func.__doc__, counter, builder, phi_grid_np,
+                             phi_grid_gd)
+        report.insert(5, alpha)
+        reports.append(report)
+        f_graph, = plt.plot(g_grid, psi_grid, label='Функция')
+        np_graph, = plt.plot(g_grid, phi_grid_np, label='Перебор')
+        gd_graph, = plt.plot(g_grid, phi_grid_gd, label='Спуск')
+        plt.legend(handles=[f_graph, np_graph, gd_graph])
+        plt.savefig(func_path)
+        plt.close()
+        counter += 1
+    return reports
+
+
 def process_3d(reports):
     builder = GridBuilder(2, 15, 15, 20)
     g_grid = builder.get_circle_grid(1, 15)
     counter = len(reports) + 1
     path = os.path.join(os.getcwd(), 'report', 'last_graphs')
-    if os.path.exists(path) and os.path.isdir(path):
+    if os.path.exists(path) and os.path.isdir(path) and len(reports) == 0:
         shutil.rmtree(path, ignore_errors=True)
     for alpha, func in ThreeDimensions.all:
         func_path = os.path.join(path, 'dim{}_{}'.format(builder.dim + 1,
@@ -64,8 +94,9 @@ def process_4d(reports):
 
 
 def main():
-    reports = process_3d([])
-    reports = process_4d(reports)
+    reports = process_2d([])
+    #reports = process_3d(reports)
+    #reports = process_4d(reports)
     write_statistics(reports)
     plt.show()
 

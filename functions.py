@@ -1,6 +1,24 @@
 import numpy as np
 
 
+class TwoDimensions:
+    @staticmethod
+    def func1(x):
+        """
+        sin(x)
+        """
+        return np.sin(4 * x)
+
+    @staticmethod
+    def func2(x):
+        """
+        cos(x^3) * x^2
+        """
+        return np.cos(x ** 2) * (x ** 3)
+
+    all = [(10, func1.__func__), (10, func2.__func__)]
+
+
 class ThreeDimensions:
     @staticmethod
     def func1(x, y):
