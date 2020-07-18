@@ -68,3 +68,12 @@ def write_statistics(reports):
         for d in ['G', 'H', 'I', 'J', 'K']:
             worksheet.column_dimensions[d].width = 24
         writer.save()
+
+
+def get_neighbours(index, dim, ann):
+    moves = [ann ** d for d in range(dim)]
+    for i in range(dim):
+        if index + moves[i] < ann ** dim:
+            yield index + moves[i]
+        if index - moves[i] >= 0:
+            yield index - moves[i]

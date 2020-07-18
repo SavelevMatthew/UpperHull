@@ -5,7 +5,7 @@ import numpy as np
 
 
 @Measurer.timer
-def get_upper_convex_hull(threads, builder, g_grid, psi_grid):
+def get_upper_convex_hull(threads, builder, g_grid, psi_grid, should_track=False):
     """
     :param threads: number of allowed processes
     :param builder: builder from grids module
@@ -21,7 +21,11 @@ def get_upper_convex_hull(threads, builder, g_grid, psi_grid):
     pool = Pool(processes=threads)
     data = pool.map(unpacked_min, args)
     pool.close()
-    return np.array(data)
+    minimals = [el[0] for el in data]
+    if not should_track:
+        return np.array(minimals), None
+    indexes = [el[1] for el in data]
+    return np.array(minimals), indexes
 
 
 def unpacked_min(packed_args):
@@ -29,5 +33,7 @@ def unpacked_min(packed_args):
 
 
 def get_min(m, g_grid, psi_grid, dir_grid):
-    return min([get_body_value(m, d, g_grid, psi_grid, dir_grid)
-                for d in range(len(dir_grid))])
+    values = [get_body_value(m, d, g_grid, psi_grid, dir_grid)
+              for d in range(len(dir_grid))]
+    minimal = min(values)
+    return minimal, values.index(minimal)

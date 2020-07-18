@@ -5,6 +5,7 @@ from grids import *
 from upperHull import GD, NP
 from functions import ThreeDimensions, FourDimensions, TwoDimensions
 from utils import *
+from smother import smooth
 
 
 def plot_3d(g_grid, f_grid, g_grid_ann):
@@ -29,7 +30,7 @@ def process_2d(reports):
         psi_grid = np.array([func(*g) for g in g_grid])
         phi_grid_np = NP.get_upper_convex_hull(cpu_count(), builder, g_grid,
                                                psi_grid)
-        phi_grid_gd = GD.get_upper_convex_hull(cpu_count(), builder, g_grid,
+        phi_grid_gd, = GD.get_upper_convex_hull(cpu_count(), builder, g_grid,
                                                psi_grid, alpha)
         report = make_report(func.__doc__, counter, builder, phi_grid_np,
                              phi_grid_gd)
@@ -57,13 +58,14 @@ def process_3d(reports):
                                                          func.__name__))
         os.makedirs(func_path)
         psi_grid = np.array([func(*g) for g in g_grid])
-        phi_grid_np = NP.get_upper_convex_hull(cpu_count(), builder, g_grid,
-                                               psi_grid)
-        phi_grid_gd = GD.get_upper_convex_hull(cpu_count(), builder, g_grid,
-                                               psi_grid, alpha)
+        should_track = func in ThreeDimensions.tracking
+        phi_grid_np, minimals = NP.get_upper_convex_hull(cpu_count(), builder, g_grid,
+                                                         psi_grid, should_track)
+        phi_grid_gd, tracks = GD.get_upper_convex_hull(cpu_count(), builder, g_grid, psi_grid, alpha, should_track)
+        phi_grid_gd = smooth(phi_grid_gd, builder.dim, builder.ann)
         report = make_report(func.__doc__, counter, builder, phi_grid_np,
                              phi_grid_gd)
-        report.insert(4, alpha)
+        report.insert(5, alpha)
         reports.append(report)
         plot_3d(g_grid, psi_grid, builder.ann)
         plt.savefig(os.path.join(func_path, 'Function.png'))
@@ -71,6 +73,16 @@ def process_3d(reports):
         plt.savefig(os.path.join(func_path, 'UpperHull_NP.png'))
         plot_3d(g_grid, phi_grid_gd, builder.ann)
         plt.savefig(os.path.join(func_path, 'UpperHull_GD.png'))
+        if should_track:
+            plt.figure()
+            d_grid = builder.get_directions_grid()
+            for i in range(len(g_grid)):
+                path = np.array([d_grid[j] for j in tracks[i]])
+                plt.plot(path[:, 0], path[:, 1])
+                min_pos = d_grid[minimals[i]]
+                actual = np.array([path[len(path) - 1], min_pos])
+                plt.plot(actual[:, 0], actual[:, 1])
+                plt.show()
         counter += 1
     return reports
 
@@ -87,15 +99,16 @@ def process_4d(reports):
                                                psi_grid, alpha)
         report = make_report(func.__doc__, counter, builder, phi_grid_np,
                              phi_grid_gd)
-        report.insert(4, alpha)
+        report.insert(5, alpha)
         reports.append(report)
         counter += 1
     return reports
 
 
 def main():
-    reports = process_2d([])
-    #reports = process_3d(reports)
+    reports = []
+    #reports = process_2d(reports)
+    reports = process_3d(reports)
     #reports = process_4d(reports)
     write_statistics(reports)
     plt.show()

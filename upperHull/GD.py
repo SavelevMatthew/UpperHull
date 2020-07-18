@@ -8,7 +8,7 @@ import math
 
 
 @Measurer.timer
-def get_upper_convex_hull(threads, builder, g_grid, psi_grid, alpha):
+def get_upper_convex_hull(threads, builder, g_grid, psi_grid, alpha, should_track=False):
     """
     The function make the upper convex hull function of the function psi
     :param threads: number of available processes to run
@@ -25,7 +25,11 @@ def get_upper_convex_hull(threads, builder, g_grid, psi_grid, alpha):
     pool = Pool(processes=threads)
     data = pool.map(unpacked_min, args)
     pool.close()
-    return np.array(data)
+    minimals = [el[0] for el in data]
+    if not should_track:
+        return np.array(minimals), None
+    tracks = [el[1] for el in data]
+    return np.array(minimals), tracks
 
 
 def unpacked_min(packed_args):
@@ -34,6 +38,7 @@ def unpacked_min(packed_args):
 
 def get_min(alpha, m, g_grid, psi_grid, dir_grid, builder):
     current_index = randint(0, len(dir_grid) - 1)
+    track = [current_index]
     last_index = current_index
     cache = deque(maxlen=int(2**builder.dim))
     available_moves = builder.dir_ann * builder.dim
@@ -45,19 +50,20 @@ def get_min(alpha, m, g_grid, psi_grid, dir_grid, builder):
         new_index = get_step(grads, current_index, last_index, builder)
         if new_index is None:
             # print(info + ' Stable exit ' + str(current_index))
-            return get_body_value(m, current_index, g_grid, psi_grid, dir_grid)
+            return (get_body_value(m, current_index, g_grid, psi_grid, dir_grid), track)
         elif new_index in cache:
             # print(info + ' Cycle detected!')
-            return min([get_body_value(m, index, g_grid, psi_grid, dir_grid)
-                        for index in cache])
+            return (min([get_body_value(m, index, g_grid, psi_grid, dir_grid)
+                        for index in cache]), track)
         last_index = current_index
         current_index = new_index
+        track.append(current_index)
         cache.append(new_index)
         if is_scholastic:
             available_moves -= 1
     if is_scholastic:
-        return min([get_body_value(m, index, g_grid, psi_grid, dir_grid)
-                    for index in cache])
+        return (min([get_body_value(m, index, g_grid, psi_grid, dir_grid)
+                    for index in cache]), track)
 
 
 def get_step(grads, current_index, last_index, builder):
