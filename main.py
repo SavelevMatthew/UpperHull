@@ -80,8 +80,11 @@ def process_3d(reports):
                 path = np.array([d_grid[j] for j in tracks[i]])
                 plt.plot(path[:, 0], path[:, 1])
                 min_pos = d_grid[minimals[i]]
-                actual = np.array([path[len(path) - 1], min_pos])
-                plt.plot(actual[:, 0], actual[:, 1])
+                last_post = path[len(path) - 1]
+                path_finish = np.array([last_post, last_post])
+                actual_finish = np.array([min_pos, min_pos])
+                plt.plot(path_finish[:, 0], path_finish[:, 1], 'bo')
+                plt.plot(actual_finish[:, 0], actual_finish[:, 1], 'ro')
                 plt.show()
         counter += 1
     return reports
