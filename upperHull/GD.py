@@ -47,7 +47,7 @@ def get_min(alpha, m, g_grid, psi_grid, dir_grid, builder):
     while (not is_scholastic) or available_moves > 0:
         grads = list(get_all_inner_grads(m, current_index, alpha, g_grid,
                                          psi_grid, dir_grid, builder.acc))
-        new_index = get_step(grads, current_index, last_index, builder)
+        new_index = get_step(grads, current_index, last_index, builder, is_scholastic)
         if new_index is None:
             # print(info + ' Stable exit ' + str(current_index))
             return (get_body_value(m, current_index, g_grid, psi_grid, dir_grid), track)
@@ -66,9 +66,20 @@ def get_min(alpha, m, g_grid, psi_grid, dir_grid, builder):
                     for index in cache]), track)
 
 
-def get_step(grads, current_index, last_index, builder):
+def get_step(grads, current_index, last_index, builder, is_scholastic):
     pairs = [(i, abs(grads[i])) for i in range(len(grads))]
     ordered = sorted(pairs, key=lambda x: -x[1])
+    if is_scholastic:
+        dim = ordered[0][0]
+        grad = grads[dim]
+        new_index = current_index + math.copysign(builder.dir_ann ** dim,
+                                                  grad)
+        new_index = int(new_index)
+        if new_index < 0 or new_index >= builder.ann ** builder.dim:
+            return current_index
+        else:
+            return new_index
+
     for move in ordered:
         dim = move[0]
         grad = grads[dim]
