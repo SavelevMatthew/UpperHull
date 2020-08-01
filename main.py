@@ -28,7 +28,7 @@ def process_2d(reports):
         func_path = os.path.join(path, 'dim{}_{}.png'.format(builder.dim + 1,
                                                          func.__name__))
         psi_grid = np.array([func(*g) for g in g_grid])
-        phi_grid_np = NP.get_upper_convex_hull(cpu_count(), builder, g_grid,
+        phi_grid_np, *_ = NP.get_upper_convex_hull(cpu_count(), builder, g_grid,
                                                psi_grid)
         phi_grid_gd, = GD.get_upper_convex_hull(cpu_count(), builder, g_grid,
                                                psi_grid, alpha)
@@ -59,7 +59,7 @@ def process_3d(reports):
         os.makedirs(func_path)
         psi_grid = np.array([func(*g) for g in g_grid])
         should_track = func in ThreeDimensions.tracking
-        phi_grid_np, minimals = NP.get_upper_convex_hull(cpu_count(), builder, g_grid,
+        phi_grid_np, minimals, values = NP.get_upper_convex_hull(cpu_count(), builder, g_grid,
                                                          psi_grid, should_track)
         phi_grid_gd, tracks = GD.get_upper_convex_hull(cpu_count(), builder, g_grid, psi_grid, alpha, should_track)
         phi_grid_gd = smooth(phi_grid_gd, builder.dim, builder.ann)
@@ -74,9 +74,13 @@ def process_3d(reports):
         plot_3d(g_grid, phi_grid_gd, builder.ann)
         plt.savefig(os.path.join(func_path, 'UpperHull_GD.png'))
         if should_track:
-            plt.figure()
             d_grid = builder.get_directions_grid()
             for i in range(len(g_grid)):
+                # Отрисовка внутренней функции
+                plt.figure()
+                plot_3d(d_grid, values[i], builder.dir_ann)
+                plt.figure()
+                # конец отрисовки
                 path = np.array([d_grid[j] for j in tracks[i]])
                 plt.plot(path[:, 0], path[:, 1])
                 min_pos = d_grid[minimals[i]]
@@ -96,7 +100,7 @@ def process_4d(reports):
     counter = len(reports) + 1
     for alpha, func in FourDimensions.all:
         psi_grid = np.array([func(*g) for g in g_grid])
-        phi_grid_np = NP.get_upper_convex_hull(cpu_count(), builder, g_grid,
+        phi_grid_np, *_ = NP.get_upper_convex_hull(cpu_count(), builder, g_grid,
                                                psi_grid)
         phi_grid_gd = GD.get_upper_convex_hull(cpu_count(), builder, g_grid,
                                                psi_grid, alpha)

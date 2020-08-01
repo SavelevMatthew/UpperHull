@@ -23,9 +23,10 @@ def get_upper_convex_hull(threads, builder, g_grid, psi_grid, should_track=False
     pool.close()
     minimals = [el[0] for el in data]
     if not should_track:
-        return np.array(minimals), None
+        return np.array(minimals), None, None
     indexes = [el[1] for el in data]
-    return np.array(minimals), indexes
+    values = [el[2] for el in data]
+    return np.array(minimals), indexes, np.array(values)
 
 
 def unpacked_min(packed_args):
@@ -36,4 +37,4 @@ def get_min(m, g_grid, psi_grid, dir_grid):
     values = [get_body_value(m, d, g_grid, psi_grid, dir_grid)
               for d in range(len(dir_grid))]
     minimal = min(values)
-    return minimal, values.index(minimal)
+    return minimal, values.index(minimal), values
