@@ -17,8 +17,8 @@ def plot_3d(g_grid, f_grid, g_grid_ann):
 
 
 def process_2d(reports):
-    builder = GridBuilder(1, 100, 100)
-    g_grid = builder.get_circle_grid(1, 100)
+    builder = GridBuilder(1, 100, 100, 1)
+    g_grid = builder.get_circle_grid(100)
     counter = len(reports) + 1
     path = os.path.join(os.getcwd(), 'report', 'last_graphs')
     if os.path.exists(path) and os.path.isdir(path):
@@ -47,8 +47,8 @@ def process_2d(reports):
 
 
 def process_3d(reports):
-    builder = GridBuilder(2, 15, 15, 20)
-    g_grid = builder.get_circle_grid(1, 15)
+    builder = GridBuilder(2, 15, 15, 1, 20)
+    g_grid = builder.get_circle_grid(15)
     counter = len(reports) + 1
     path = os.path.join(os.getcwd(), 'report', 'last_graphs')
     if os.path.exists(path) and os.path.isdir(path) and len(reports) == 0:
@@ -62,7 +62,7 @@ def process_3d(reports):
         phi_grid_np, minimals, values = NP.get_upper_convex_hull(cpu_count(), builder, g_grid,
                                                          psi_grid, should_track)
         phi_grid_gd, tracks = GD.get_upper_convex_hull(cpu_count(), builder, g_grid, psi_grid, alpha, should_track)
-        phi_grid_gd = smooth(phi_grid_gd, builder.dim, builder.ann)
+        # phi_grid_gd = smooth(phi_grid_gd, builder.dim, builder.ann)
         report = make_report(func.__doc__, counter, builder, phi_grid_np,
                              phi_grid_gd)
         report.insert(5, alpha)
@@ -95,8 +95,8 @@ def process_3d(reports):
 
 
 def process_4d(reports):
-    builder = GridBuilder(3, 5, 5)
-    g_grid = builder.get_circle_grid(1, 5)
+    builder = GridBuilder(3, 5, 5, 1)
+    g_grid = builder.get_circle_grid(5)
     counter = len(reports) + 1
     for alpha, func in FourDimensions.all:
         psi_grid = np.array([func(*g) for g in g_grid])

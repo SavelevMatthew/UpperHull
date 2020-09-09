@@ -2,12 +2,13 @@ import numpy as np
 
 
 class GridBuilder:
-    def __init__(self, dim, ann, dir_ann, accuracy=100):
+    def __init__(self, dim, ann, dir_ann, radius, accuracy=100):
         self.dim = dim
         self.ann = ann
         self.dir_ann = dir_ann
         self.divs = [self.ann ** i for i in range(self.dim)]
         self.acc = accuracy
+        self.radius = radius
 
     def get_directions_grid(self):
         """
@@ -25,17 +26,17 @@ class GridBuilder:
 
         return dir_grid
 
-    def get_circle_grid(self, radius, ann):
+    def get_circle_grid(self, ann):
         """
         Creates the uniform circle grid
         :param radius: radius of the circle
         :return: numpy array of notes of the uniform circle grid
         """
-        cubic_grid = self.get_cubic_grid(-radius, radius, ann)
-        # return np.array([value for value in cubic_grid if np.linalg.norm(value) <= radius])
-        return cubic_grid
+        cubic_grid = self.get_cubic_grid(-self.radius, self.radius, ann, self.radius)
+        return np.array([value for value in cubic_grid if np.linalg.norm(value) <= self.radius])
+        # return cubic_grid
 
-    def get_cubic_grid(self, min_value, max_value, ann):
+    def get_cubic_grid(self, min_value, max_value, ann, bound_radius=None):
         """
         Creates the uniform cubic grid
         :param ann: number of dots in every dimension
@@ -49,7 +50,8 @@ class GridBuilder:
         for i in range(ann ** self.dim):
             _i = i
             for j in range(self.dim):
-                grid[i][j] = min_value + diameter * (_i % ann + 0.5)
+                value = min_value + diameter * (_i % ann + 0.5)
+                grid[i][j] = value
                 _i //= ann
 
         return grid
