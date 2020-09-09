@@ -51,7 +51,7 @@ def get_min(alpha, m, g_grid, psi_grid, dir_grid, builder):
         if new_index is None:
             # print(info + ' Stable exit ' + str(current_index))
             return (get_body_value(m, current_index, g_grid, psi_grid, dir_grid), track)
-        elif new_index in cache:
+        elif (not is_scholastic) and new_index in cache:
             # print(info + ' Cycle detected!')
             return (min([get_body_value(m, index, g_grid, psi_grid, dir_grid)
                         for index in cache]), track)
